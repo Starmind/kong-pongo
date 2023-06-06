@@ -620,12 +620,19 @@ function healthy {
 
   echo "$state" | grep \"Health\" &> /dev/null
   if [[ ! $? -eq 0 ]]; then
-    # no healthcheck defined, assume healthy
+    # indicates no healthcheck defined for docker, assume healthy
+    echo "match docker"
     return 0
   fi
 
-  echo "$state" | grep \"healthy\" &> /dev/null
-  return $?
+  if echo "$state" | grep -q '"Status": ""'; then
+    # indicates no healthcheck defined for podman, assume healthy
+    echo "match podman"
+    return 0
+  else
+    echo "$state" | grep \"healthy\" &> /dev/null
+    return $?
+  fi
 }
 
 
